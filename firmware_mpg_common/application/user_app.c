@@ -64,10 +64,190 @@ static u32 UserApp_u32Timeout;                      /* Timeout counter used acro
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
+/**
+ Function user by yan
 
+
+//
+Description :
+led pattern display.
+squence display
+**/
+
+static void led_on_display()
+{
+   static u32 u32_display_timer =0;
+   static u8 u8_led_num =0;
+   u8 u8_counter;
+   u32_display_timer++;
+   if(u32_display_timer%1000==0)
+   {
+     for(u8_counter=0;u8_counter<=8;u8_counter++)
+     {
+       if(u8_counter==u8_led_num)
+         LedOn(u8_counter);
+       else
+         LedOff(u8_counter);
+     }
+     if(u8_led_num<=8)
+     u8_led_num++;
+     else
+       u8_led_num=0;
+   }
+}
+////
+/// back and forth 
+static void led_on_display_pattern()
+{
+  static u32 u32_display_timer =0;//function clock
+  static u8  u8_led_num=0;       //the number of leds
+  static u8  u8_squence_timer=0;//the time of circles
+ static  u8  u8_divid_clock  =0;//to divided the time
+  u8  u8_counter;               //temp counter
+  u32_display_timer++;
+ // if(u32_display_timer%(2500/(u8_squence_timer+1))==0)
+  //if(u32_display_timer%(2500/(u8_led_num+u8_squence_timer+1))==0)
+  if(u32_display_timer%(2500/(u8_divid_clock+1))==0)
+    {
+        switch(u8_squence_timer)
+        {   
+        case 0://the forth
+          for(u8_counter=0;u8_counter<=8;u8_counter++)
+            {if(u8_counter==u8_led_num)
+              LedOn(u8_counter);
+             else
+               LedOff(u8_counter);
+            }
+          break;
+        case 1://back 
+           for(u8_counter=0;u8_counter<=8;u8_counter++)
+            {if(u8_counter==(8-u8_led_num))
+              LedOn(8-u8_led_num);
+            else
+             LedOff(u8_counter);
+          }
+          break;
+        case 2:
+          for(u8_counter=0;u8_counter<=8;u8_counter++)
+            {if(u8_counter==u8_led_num)
+              LedOn(u8_counter);
+             else
+               LedOff(u8_counter);
+            }
+          break;
+        case 3://back 
+            for(u8_counter=0;u8_counter<=8;u8_counter++)
+              {if(u8_counter==(8-u8_led_num))
+              LedOn(8-u8_led_num);
+              else
+              LedOff(u8_counter);
+              }
+        break;
+        }
+       if(u8_led_num>9)
+       {
+         u8_led_num=0;
+         u8_squence_timer++;
+         if(u8_squence_timer==4)
+           u8_squence_timer =0;
+       }
+        
+         u8_led_num++; 
+        u8_divid_clock++;
+        if(u8_divid_clock>=100)
+          u8_divid_clock=0;
+    }
+  
+}
+static void led_pattern_display_two()
+{
+  static u32 u32_display_timer =0;
+  static u8  u8_led_num=0;
+  u8  u8_counter;
+  u32_display_timer++;
+  
+ 
+ if(u32_display_timer%(1000/(u8_led_num+1))==0)
+  {
+    LedOn(4+u8_led_num-1);
+    LedOn(3-u8_led_num+1);
+     if(u8_led_num==5)//time is important
+        {
+           for(u8_counter=0;u8_counter<=7;u8_counter++)
+            LedOff(u8_counter);//ledo
+           u8_led_num =0;
+          
+      }
+      u8_led_num++;
+  }
+ if(u32_display_timer==100000)
+   u32_display_timer=0;
+}
+/**
+ Function user by yan
+
+
+//
+Description :
+led pattern display.
+squence display
+**/
+static void led_pattern_display()
+{
+   static u32 u32_display_timer=0;
+   static u8  u8_led_num=0;
+  u8 led_num;
+  //for(led_num=0;led_num<=6;led_num++)
+ //   LedOff(led_num);//ledo
+  u32_display_timer++;
+  if(u32_display_timer%1000==0)
+  {
+    LedOn(u8_led_num);
+    u8_led_num++;
+    if(u8_led_num==9)//time is important
+    {
+       for(led_num=0;led_num<=7;led_num++)
+        LedOff(led_num);//ledo
+       u8_led_num =0;
+      
+    }
+   //  u8_led_num++;
+  } 
+}
+
+///
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Public functions                                                                                                   */
 /*--------------------------------------------------------------------------------------------------------------------*/
+//Button press to implenent is changed. by yan
+
+static void change_mession()
+{
+  static u8 Task_change =0;
+     if(WasButtonPressed(BUTTON1))
+     {
+       ButtonAcknowledge(BUTTON1);
+       Task_change++;
+       if(Task_change>=4)
+         Task_change=0;
+     }
+     switch(Task_change)
+     {
+     case 0:
+          led_pattern_display();
+       break;
+     case 1:
+          led_on_display();
+       break;
+     case 2:
+       led_on_display_pattern();
+       break;
+     case 3:
+       led_pattern_display_two();
+       break;
+     }
+}
+
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -127,7 +307,8 @@ void UserAppInitialize(void)
   /* If good initialization, set state to Idle */
   if( 1 /* Add condition for good init */)
   {
-    UserApp_StateMachine = UserAppSM_Idle;
+    //UserApp_StateMachine = UserAppSM_Idle;
+    UserApp_StateMachine = change_mession;
   }
   else
   {
@@ -136,6 +317,7 @@ void UserAppInitialize(void)
   }
 
 } /* end UserAppInitialize() */
+
 
 
 /*----------------------------------------------------------------------------------------------------------------------
