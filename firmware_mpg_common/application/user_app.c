@@ -73,7 +73,49 @@ Description :
 led pattern display.
 squence display
 **/
-
+static void Array_test()
+{ u8 led_num[8]={0};// led state;
+   static u8 u8_counter=0;//to counter the led light
+  u8 counter_temp;//temp 
+  static u32 u32_timer;//timer 
+  u32_timer++;
+  if(u32_timer%1000==0)
+  { 
+    led_num[8-u8_counter]=1;
+    u8_counter++;
+   if(u8_counter>9)
+    
+   { u8_counter=0;
+     for(counter_temp=0;counter_temp<=8;counter_temp++)
+       led_num[counter_temp]=0;//turn off all leds  
+   }
+  }
+  for(counter_temp=0;counter_temp<=8;counter_temp++)
+  { 
+     if(led_num[8-counter_temp]==1)
+       LedOn(8-counter_temp);
+     
+       
+  }
+}
+static void Led_on_green()
+{
+  static u32 u32_timer=0;
+  u8 u8_counter;
+  for(u8_counter=0;u8_counter<=8;u8_counter++)
+  {
+       if(u8_counter!=GREEN)
+         LedOff(u8_counter);
+  }
+   u32_timer++;
+   
+   if(u32_timer%1000==0)
+   {
+     LedToggle(GREEN);
+       
+   }
+  
+}
 static void led_on_display()
 {
    static u32 u32_display_timer =0;
@@ -143,6 +185,8 @@ static void led_on_display_pattern()
               LedOff(u8_counter);
               }
         break;
+       
+          
         }
        if(u8_led_num>9)
        {
@@ -228,7 +272,7 @@ static void change_mession()
      {
        ButtonAcknowledge(BUTTON1);
        Task_change++;
-       if(Task_change>=4)
+       if(Task_change>=6)
          Task_change=0;
      }
      switch(Task_change)
@@ -244,6 +288,12 @@ static void change_mession()
        break;
      case 3:
        led_pattern_display_two();
+       break;
+     case 4:
+       Led_on_green();//led_on_g
+       break;
+     case 5:
+       Array_test();
        break;
      }
 }
